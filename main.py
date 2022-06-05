@@ -15,7 +15,11 @@ class Status(Enum):
 
 class Ant:
     def __init__(
-            self, start_position: Tuple[int, int] = (0, 0), sigma1: float = 50, sigma2: float = 15, release_fraction: int = 1000
+        self,
+        start_position: Tuple[int, int] = (0, 0),
+        sigma1: float = 50,
+        sigma2: float = 15,
+        release_fraction: int = 1000,
     ):
         self._x = start_position[0]
         self._y = start_position[1]
@@ -63,12 +67,12 @@ class Ant:
         return np.cos(alpha), np.sin(alpha)
 
     def move(self):
-        if self.job == Status(1):
+        if self.job == Status.IN_NEST:
             if self._exit_nest:
                 self.x += np.random.randint(0, 2) * 2 - 1
                 self.y += np.random.randint(0, 2) * 2 - 1
-                self.job = Status(2)
-        elif self.job == Status(2):
+                self.job = Status.FORAGING
+        elif self.job == Status.FORAGING:
             self.x += self._movement_x
             self.y += self._movement_y
             self.counter += 1
@@ -83,24 +87,26 @@ class Arena:
     def __init__(
         self,
         patch_size: int,
-        grid_size: Tuple[int, int],
-        nest_position: Optional[List[Tuple[float, float]]] = None,
+        grid_size: int,
+        nest_positions: Optional[List[Tuple[float, float]]] = None,
         food_positions: Optional[List[Tuple[float, float]]] = None,
     ):
         """
         Args:
             patch_size: an int describing each patch size in mm
-            ends: list of 4 ints describing the size of rectangular arena with indexes being left, right, bottom, top
-            food_positions: NOT IMPLEMENTED: list of tuples of floats describing coordinates of food.
+            grid_size: an int describing the size of the square arena
+            nest_position: TODO: not implemented
+            food_positions: TODO: not implemented
         """
-        self._nest_positions = []
+        self._nest_positions = nest_positions
         self._food_positions = food_positions
         self._patch_size = patch_size
-        self._grid = np.zeros((grid_size[0], grid_size[1]))
+        self._grid = np.zeros((grid_size, grid_size))
+        self._grid_size = grid_size
 
     @property
     def grid_size(self):
-        return (len(self._grid[0]), len(self._grid[1]))
+        return self._grid_size
 
     @property
     def left(self):
@@ -130,9 +136,6 @@ class AnimatedScatter:
         self.ants = ants
         self.arena = arena
 
-        self.xs = np.asarray([])
-        self.ys = np.asarray([])
-
         self.stream = self.data_stream()
 
         self.fig, self.ax = plt.subplots()
@@ -149,11 +152,9 @@ class AnimatedScatter:
         x, y = next(self.stream).T
 
         self.scat = self.ax.scatter(x, y, cmap="jet", edgecolor="k")
-        self.ax.axis(
-            [0, self.arena.grid_size[0], 0, self.arena.grid_size[1]]
-        )
+        self.ax.axis([0, self.arena.grid_size, 0, self.arena.grid_size])
 
-        return self.scat,
+        return (self.scat,)
 
     def data_stream(self):
         """Move ants a time step"""
@@ -169,9 +170,19 @@ class AnimatedScatter:
         return (self.scat,)
 
 
+class Simulator:
+    def __init__(self, arena: Arena, ants: List[Ant]):
+        self._arena = arena
+        self._ants = ants
+
+    def __next__(self):
+
+        pass
+
+
 if __name__ == "__main__":
-    arena = Arena(patch_size=1, grid_size=(50, 50))
+    arena = Arena(patch_size=1, grid_size=50)
     nest_position = (25, 25)
-    ants = [Ant(start_position=nest_position, release_fraction=100) for _ in range(100)]
+    ants = [Ant(start_position=nest_position, release_fraction=10) for _ in range(10)]
     ani = AnimatedScatter(ants, arena, interval=100)
     plt.show()
