@@ -20,7 +20,8 @@ public:
     void move_in_current_direction();
     bool has_found_food();
     bool reached_nest();
-    double distance_to_food();
+    bool is_carrying_food() const;
+    void clear_food_source();
 
 private:
     double x;
@@ -34,16 +35,15 @@ private:
     Status job;
     bool carrying_food = false;
     const int food_amount = 1;
-    double angle;
     int steps_since_angle_change = 0;
 
     bool exit_nest();
     void random_move();
     void go_towards_nest();
     void follow_pheromone(Arena& arena);
-    double distance_to_nest();
     double logistic_sample(double location, double scale);
     double random_normal(double mean, double stddev);
+    double distance(double x1, double y1, double x2, double y2);
 
     static std::default_random_engine generator;
     static std::uniform_real_distribution<double> angle_distribution;

@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+#include <stdexcept>
+#include <cmath>
+#include "constants.h"
 
 class Arena {
 public:

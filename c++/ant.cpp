@@ -19,14 +19,14 @@ void Ant::move(Arena& arena) {
     } else if (job == Status::FORAGING) {
         double pheromone_level = arena.get_pheromone(static_cast<int>(x), static_cast<int>(y));
         double follow_probability = pheromone_level / (1 + pheromone_level);
-        double random_follow_threshold = logistic_sample(FOLLOW_THRESHOLD_LOCATION, FOLLOW_THRESHOLD_SCALE);
+        double random_follow_threshold = logistic_sample(Constants::FOLLOW_THRESHOLD_LOCATION, Constants::FOLLOW_THRESHOLD_SCALE);
         if (has_found_food()) {
             int food_taken = food_source->take_food(food_amount);
             if (food_taken > 0) {
                 carrying_food = true;
                 job = Status::RETURN;
             }
-        } else if (!carrying_food && follow_probability > random_follow_threshold){
+        } else if (follow_probability > random_follow_threshold){
             int x_int = static_cast<int>(x);
             int y_int = static_cast<int>(y);
             if (x_int >= 0 && x_int < arena_size && y_int >= 0 && y_int < arena_size) {
@@ -35,7 +35,7 @@ void Ant::move(Arena& arena) {
 
         } else {
             steps_since_angle_change++;
-            if (steps_since_angle_change >= (rand() % MAX_STEPS_BEFORE_ANGLE_CHANGE) + 1) {
+            if (steps_since_angle_change >= (rand() % Constants::MAX_STEPS_BEFORE_ANGLE_CHANGE) + 1) {
                 steps_since_angle_change = 0;
                 random_move();
             } else {
@@ -45,7 +45,10 @@ void Ant::move(Arena& arena) {
     } else if (job == Status::RETURN) {
         if (carrying_food) {
             go_towards_nest();
-            double strength = 5 / distance_to_food();
+            double strength = 0;
+            if (food_source){
+                strength = 5 / distance(x, y, food_source->get_x(), food_source->get_y());
+            }
             arena.deposit_pheromone(static_cast<int>(x), static_cast<int>(y), strength);
         }
 
@@ -57,31 +60,25 @@ void Ant::move(Arena& arena) {
 }
 
 void Ant::move_in_current_direction() {
-    double new_x = x + MOVE_DISTANCE * cos(direction_angle);
-    double new_y = y + MOVE_DISTANCE * sin(direction_angle);
-    x = std::clamp(new_x, 0.0, ARENA_SIZE - 1.0);
-    y = std::clamp(new_y, 0.0, ARENA_SIZE - 1.0);
+    double new_x = x + Constants::MOVE_DISTANCE * cos(direction_angle);
+    double new_y = y + Constants::MOVE_DISTANCE * sin(direction_angle);
+    x = std::clamp(new_x, 0.0, Constants::ARENA_SIZE - 1.0);
+    y = std::clamp(new_y, 0.0, Constants::ARENA_SIZE - 1.0);
 }
 
 bool Ant::has_found_food() {
-    double dx = x - food_source->get_x();
-    double dy = y - food_source->get_y();
-    double distance = sqrt(dx * dx + dy * dy);
-
-    // Check if the ant is within the food radius.
-    return distance <= food_source->get_radius();
+    if (food_source){
+        double distance_to_food = distance(x, y, food_source->get_x(), food_source->get_y());
+        // Check if the ant is within the food radius.
+        return distance_to_food <= food_source->get_radius();
+    }
+    return false;
 }
 
 bool Ant::reached_nest() {
-    double distance_to_nest = std::hypot(x - nest_x, y - nest_y);
-    return distance_to_nest <= nest_radius;
+    return distance(x, y, nest_x, nest_y) <= nest_radius;
 }
 
-double Ant::distance_to_food() {
-    double food_x = food_source->get_x();
-    double food_y = food_source->get_y();
-    return std::hypot(x - food_x, y - food_y);
-}
 double Ant::get_x() const {
     return x;
 }
@@ -141,8 +138,8 @@ void Ant::follow_pheromone(Arena& arena) {
         double random_angle = random_normal(0, 0.1); // Adjust the second parameter for more or less randomness
         double combined_angle = angle_to_next_cell + random_angle;
 
-        double proposed_x = x + MOVE_DISTANCE * cos(combined_angle);
-        double proposed_y = y + MOVE_DISTANCE * sin(combined_angle);
+        double proposed_x = x + Constants::MOVE_DISTANCE * cos(combined_angle);
+        double proposed_y = y + Constants::MOVE_DISTANCE * sin(combined_angle);
 
         int clamped_x = std::clamp(static_cast<int>(proposed_x), 0, arena_size - 1);
         int clamped_y = std::clamp(static_cast<int>(proposed_y), 0, arena_size - 1);
@@ -152,17 +149,26 @@ void Ant::follow_pheromone(Arena& arena) {
     }
 }
 
-double Ant::distance_to_nest() {
-    return std::hypot(x - nest_x, y - nest_y);
-}
-
 double Ant::logistic_sample(double location, double scale) {
     double u = logistic_distribution(generator);
     return location + scale * std::log(u / (1 - u));
 }
+
 double Ant::random_normal(double mean, double stddev) {
     double u1 = (rand() % 1000) / 1000.0;
     double u2 = (rand() % 1000) / 1000.0;
     double z = std::sqrt(-2.0 * std::log(u1)) * std::cos(2 * M_PI * u2);
     return mean + stddev * z;
+}
+
+bool Ant::is_carrying_food() const {
+    return carrying_food;
+}
+
+void Ant::clear_food_source() {
+    food_source.reset();
+}
+
+double Ant::distance(double x1, double y1, double x2, double y2) {
+    return std::hypot(x1 - x2, y1 - y2);
 }
