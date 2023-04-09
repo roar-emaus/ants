@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 #include <sstream>
+#include <fstream>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics.hpp>
@@ -36,22 +37,17 @@ int main() {
     sf::CircleShape food(Constants::FOOD_RADIUS);
     food.setFillColor(sf::Color(0, 255, 0));
     food.setPosition(food_source.get_x() - Constants::FOOD_RADIUS, food_source.get_y() - Constants::FOOD_RADIUS);
-    sf::Font font;
-    if (!font.loadFromFile("DejaVuSansMono.ttf")) {
-        std::cerr << "Error loading font" << std::endl;
-        return 1;
-    }
-    
-    sf::Text food_remaining_text;
-    food_remaining_text.setFont(font);
-    food_remaining_text.setCharacterSize(24);
-    food_remaining_text.setFillColor(sf::Color::White);
-    food_remaining_text.setPosition(Constants::WINDOW_SIZE, 10);
 
     std::vector<sf::CircleShape> ant_shapes(Constants::NUM_ANTS, sf::CircleShape(Constants::ANT_RADIUS));
     for (auto& ant_shape : ant_shapes) {
         ant_shape.setFillColor(sf::Color::Red);
     }
+
+    std::vector<double> avg_distances;
+    std::ofstream position_file("ant_positions.csv");
+
+    int timestep = 0;
+    position_file << "Timestep, AntIndex, X, Y, Cos, Sin, DirectionAngle, Job, PheromoneLevel" << std::endl;
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -61,6 +57,7 @@ int main() {
         }
 
         window.clear();
+
         bool food_source_empty = food_source_ptr->is_food_source_empty();
         for (std::size_t i = 0; i < ants.size(); ++i) {
             auto& ant = ants[i];
@@ -72,19 +69,26 @@ int main() {
             double ant_x = ant.get_x() - Constants::ANT_RADIUS;
             double ant_y = ant.get_y() - Constants::ANT_RADIUS;
             ant_shape.setPosition(ant_x, ant_y);
+            position_file << timestep << ", " 
+                          << i << ", " 
+                          << ant_x << ", " 
+                          << ant_y << ", " 
+                          << ant.get_x_cos() << ", "
+                          << ant.get_y_sin() << ", "
+                          << ant.get_angle() << ", " 
+                          << ant.ant_job_to_string() << ", " 
+                          << arena.get_pheromone(static_cast<int>(ant_x), static_cast<int>(ant_y)) 
+            << std::endl;
             window.draw(ant_shape);
         }
+        position_file << std::endl;
+        timestep++;
 
         window.draw(nest);
         if (!food_source_ptr->is_food_source_empty()) {
             window.draw(food);
-            std::stringstream ss;
-            ss << "Food remaining: " << food_source_ptr->get_food_remaining();
-            food_remaining_text.setString(ss.str());
-            window.draw(food_remaining_text);
         }    
-        arena.update_pheromones();
-
+        arena.update_pheromones(food_source);
         window.display();
     }
 
