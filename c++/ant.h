@@ -8,10 +8,10 @@ enum class Status { IN_NEST, FORAGING, RETURN };
 
 class Ant {
 public:
-  Ant(double start_x, double start_y, int arena_size, double nest_x,
-      double nest_y, std::shared_ptr<FoodSource> food_source);
+  Ant(double start_x, double start_y, double nest_x, double nest_y,
+      std::shared_ptr<FoodSource> food_source, std::shared_ptr<Arena> arena);
 
-  void move(Arena& arena);
+  void move();
   [[nodiscard]] auto get_x() const -> double;
   [[nodiscard]] auto get_y() const -> double;
   [[nodiscard]] auto get_angle() const -> double;
@@ -30,11 +30,11 @@ private:
   double x_cos = 0.0;
   double y_sin = 0.0;
   double direction_angle;
-  int arena_size;
   double nest_x;
   double nest_y;
   double nest_radius = 8.0;
   std::shared_ptr<FoodSource> food_source;
+  std::shared_ptr<Arena> arena;
   Status job;
   bool carrying_food = false;
   const int food_amount = 1;
@@ -42,9 +42,8 @@ private:
 
   auto exit_nest() -> bool;
   void set_angle_towards_nest();
-  void follow_pheromone(Arena& arena);
-  auto should_follow_pheromone(Arena& arena) -> bool;
-  auto random_normal(double mean, double stddev) -> double;
+  void follow_pheromone();
+  auto should_follow_pheromone() -> bool;
   auto distance(double x1, double y1, double x2, double y2) -> double;
   void update_position();
   void update_angle();

@@ -24,6 +24,7 @@ int main() {
   window.setFramerateLimit(Constants::FRAME_RATE);
 
   Arena arena(Constants::ARENA_SIZE);
+  std::shared_ptr<Arena> arena_ptr = std::make_shared<Arena>(arena);
   FoodSource food_source(20, 20, Constants::FOOD_AMOUNT,
                          Constants::FOOD_RADIUS);
   std::shared_ptr<FoodSource> food_source_ptr =
@@ -32,8 +33,8 @@ int main() {
 
   for (int i = 0; i < Constants::NUM_ANTS; i++) {
     ants.emplace_back(Ant(Constants::NEST_X, Constants::NEST_Y,
-                          Constants::ARENA_SIZE, Constants::NEST_X,
-                          Constants::NEST_Y, food_source_ptr));
+                          Constants::NEST_X, Constants::NEST_Y, food_source_ptr,
+                          arena_ptr));
   }
 
   sf::CircleShape nest(Constants::NEST_RADIUS);
@@ -76,7 +77,7 @@ int main() {
       if (food_source_empty) {
         ant.clear_food_source();
       }
-      ant.move(arena);
+      ant.move();
       double ant_x = ant.get_x() - Constants::ANT_RADIUS;
       double ant_y = ant.get_y() - Constants::ANT_RADIUS;
       ant_shape.setPosition(ant_x, ant_y);
@@ -84,19 +85,20 @@ int main() {
                     << ", " << ant.get_x_cos() << ", " << ant.get_y_sin()
                     << ", " << ant.get_angle() << ", "
                     << ant.ant_job_to_string() << ", "
-                    << arena.get_pheromone(static_cast<int>(ant_x),
+                    << arena_ptr->get_pheromone(static_cast<int>(ant_x),
                                            static_cast<int>(ant_y))
                     << std::endl;
       window.draw(ant_shape);
     }
     position_file << std::endl;
     timestep++;
-
+    
+    std::cout << arena_ptr->get_total_pheromones() << std::endl;
     window.draw(nest);
     if (!food_source_ptr->is_food_source_empty()) {
       window.draw(food);
     }
-    arena.update_pheromones(food_source);
+    arena_ptr->update_pheromones();
     window.display();
   }
 
