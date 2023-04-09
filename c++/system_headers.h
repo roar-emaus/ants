@@ -1,6 +1,6 @@
 #pragma once
-#include <random>
-#include <memory>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <memory>
+#include <random>
 #include <stdexcept>
