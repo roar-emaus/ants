@@ -32,6 +32,7 @@ void Ant::move() {
       follow_pheromone();
       update_position();
     } else {
+      steps_since_angle_change++;
       update_position();
     }
   } else if (job == Status::RETURN) {
@@ -55,7 +56,6 @@ void Ant::move() {
 }
 
 void Ant::update_position() {
-  steps_since_angle_change++;
   if (steps_since_angle_change >= exponential_distribution(generator)) {
     steps_since_angle_change = 0;
     direction_angle = angle_distribution(generator);
@@ -138,8 +138,10 @@ void Ant::follow_pheromone() {
   // find angle to neighboring cell with the highest pheromone level
   double angle_to_next_cell = std::atan2(new_y - y, new_x - x);
   double random_angle = random_angle_distribution(generator);
-  direction_angle = angle_to_next_cell + random_angle;
-  update_angle();
+  if (std::abs(angle_to_next_cell - direction_angle) > 4){
+    direction_angle = angle_to_next_cell + random_angle;
+    update_angle();
+  }
 }
 
 bool Ant::is_carrying_food() const { return carrying_food; }
