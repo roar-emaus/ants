@@ -3,10 +3,10 @@
 
 namespace Constants {
 const int WINDOW_SIZE = 50;
-const int ARENA_SIZE = 200;
+const int ARENA_SIZE = 500;
 const int NEST_X = ARENA_SIZE / 2;
 const int NEST_Y = ARENA_SIZE / 2;
-const int NUM_ANTS = 100;
+const int NUM_ANTS = 1000;
 const int FOOD_AMOUNT = 100;
 const int ANT_RADIUS = 3;
 const int FOOD_RADIUS = 10;

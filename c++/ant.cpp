@@ -1,6 +1,5 @@
 #include "ant.h"
 #include "constants.h"
-#include <iostream>
 
 std::default_random_engine Ant::generator(std::random_device{}());
 std::uniform_real_distribution<double> Ant::angle_distribution(0.0, 2 * M_PI);
@@ -56,13 +55,11 @@ void Ant::move() {
 }
 
 void Ant::update_position() {
-  if (job == Status::FORAGING){
-    steps_since_angle_change++;
-    if (steps_since_angle_change >= exponential_distribution(generator)) {
-      steps_since_angle_change = 0;
-      direction_angle = angle_distribution(generator);
-      update_angle();
-    }
+  steps_since_angle_change++;
+  if (steps_since_angle_change >= exponential_distribution(generator)) {
+    steps_since_angle_change = 0;
+    direction_angle = angle_distribution(generator);
+    update_angle();
   }
 
   double new_x = x + Constants::MOVE_DISTANCE * x_cos;
@@ -117,7 +114,7 @@ void Ant::follow_pheromone() {
   double max_pheromone = -1;
   int new_x = x_int;
   int new_y = y_int;
-  int pheromone_radius = 4;
+  int pheromone_radius = 6;
 
   for (int i = -pheromone_radius; i <= pheromone_radius; ++i) {
     for (int j = -pheromone_radius; j <= pheromone_radius; ++j) {
