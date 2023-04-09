@@ -12,7 +12,7 @@ auto Arena::get_pheromone(int x, int y) -> double {
 }
 
 void Arena::update_pheromones(const FoodSource& food_source) {
-        double const evaporation_rate = food_source.is_food_source_empty() ? Constants::INCREASED_PHEROMONE_DISSIPATION_RATE: Constants::PHEROMONE_DISSIPATION_RATE;
+    double const evaporation_rate = food_source.is_food_source_empty() ? Constants::INCREASED_PHEROMONE_DISSIPATION_RATE: Constants::PHEROMONE_DISSIPATION_RATE;
     for (int i = 0; i < arena_size; ++i) {
         for (int j = 0; j < arena_size; ++j) {
             // Dissipate pheromone over time
