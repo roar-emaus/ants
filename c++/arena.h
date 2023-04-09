@@ -18,4 +18,3 @@ private:
     int arena_size;
     std::vector<std::vector<double>> pheromone_grid;
 };
-
