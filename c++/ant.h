@@ -1,8 +1,5 @@
 #pragma once
-#include <random>
-#include <memory>
-#include <cmath>
-#include <algorithm>
+#include "system_headers.h"
 #include "constants.h"
 #include "arena.h"
 #include "food_source.h"

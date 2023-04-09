@@ -3,7 +3,7 @@
 Arena::Arena(int arena_size)
     : arena_size(arena_size), pheromone_grid(arena_size, std::vector<double>(arena_size, 0.0)) {}
 
-double Arena::get_pheromone(int x, int y) {
+auto Arena::get_pheromone(int x, int y) -> double {
     if (x < 0 || x >= arena_size || y < 0 || y >= arena_size) {
         return 0.0;
         //throw std::out_of_range("Coordinates are outside the grid");
@@ -12,7 +12,7 @@ double Arena::get_pheromone(int x, int y) {
 }
 
 void Arena::update_pheromones(const FoodSource& food_source) {
-        double evaporation_rate = food_source.is_food_source_empty() ? Constants::INCREASED_PHEROMONE_DISSIPATION_RATE: Constants::PHEROMONE_DISSIPATION_RATE;
+        double const evaporation_rate = food_source.is_food_source_empty() ? Constants::INCREASED_PHEROMONE_DISSIPATION_RATE: Constants::PHEROMONE_DISSIPATION_RATE;
     for (int i = 0; i < arena_size; ++i) {
         for (int j = 0; j < arena_size; ++j) {
             // Dissipate pheromone over time
@@ -29,11 +29,11 @@ void Arena::deposit_pheromone(int x, int y, double strength) {
     pheromone_grid[x][y] += strength;
 }
 
-int Arena::get_arena_size() const {
+auto Arena::get_arena_size() const -> int {
     return arena_size;
 }
 
-double Arena::get_total_pheromones() const {
+auto Arena::get_total_pheromones() const -> double {
     double total_pheromones = 0;
     for (int i = 0; i < arena_size; ++i) {
         for (int j = 0; j < arena_size; ++j) {
@@ -53,10 +53,11 @@ void Arena::diffuse_pheromones() {
 
             for (int dx = -1; dx <= 1; ++dx) {
                 for (int dy = -1; dy <= 1; ++dy) {
-                    if (dx == 0 && dy == 0) continue; // Skip the current cell
+                    if (dx == 0 && dy == 0) { continue; // Skip the current cell
+}
 
-                    int x = i + dx;
-                    int y = j + dy;
+                    int const x = i + dx;
+                    int const y = j + dy;
 
                     if (x >= 0 && x < arena_size && y >= 0 && y < arena_size) {
                         neighbor_sum += pheromone_grid[x][y];

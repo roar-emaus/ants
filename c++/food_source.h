@@ -1,6 +1,5 @@
 #pragma once
-#include <cmath>
-#include <algorithm>
+#include "system_headers.h"
 
 class FoodSource {
 public:

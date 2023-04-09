@@ -1,4 +1,5 @@
 #pragma once
+#include "system_headers.h"
 
 namespace Constants {
     const int WINDOW_SIZE = 100;
